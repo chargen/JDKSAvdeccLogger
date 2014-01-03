@@ -25,7 +25,55 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "jdksavdecc-logger.h"
+#include "us_rawnet.h"
+#include <ifaddrs.h>
+
+bool open_all_network_ports(void);
+void close_all_network_ports(void);
+
+#define MAX_ETHERNET_PORTS (16)
+
+us_rawnet_context_t ethernet_ports[MAX_ETHERNET_PORTS];
+int ethernet_port_count=0;
+
+#if defined(__APPLE__) || defined( __linux__ )
+bool open_all_network_ports(void) {
+    struct ifaddrs *net_interfaces;
+    if( getifaddrs(&net_interfaces)==0 ) {
+        struct ifaddrs *cur = net_interfaces;
+        while ( cur && ethernet_port_count<MAX_ETHERNET_PORTS ) {
+            if( us_rawnet_socket(
+                    &ethernet_ports[ ethernet_port_count ],
+                    JDKSAVDECC_AVTP_ETHERTYPE,
+                    cur->ifa_name,
+                    jdksavdecc_multicast_adp_acmp.value )>=0 ) {
+                ethernet_port_count++;
+                fprintf(stdout,"Opened ethernet port %s\n", cur->ifa_name);
+            }
+            cur=cur->ifa_next;
+        }
+        freeifaddrs(net_interfaces);
+    } else {
+        fprintf(stderr,"Unable to query interface address list");
+    }
+    return ethernet_port_count>0;
+}
+
+void close_all_network_ports(void) {
+    int i;
+    for( i=0; i<ethernet_port_count; ++i ) {
+        us_rawnet_close(&ethernet_ports[i]);
+    }
+}
+
+#elif defined(WIN32)
+// TODO: windows version of open_all_network_ports
+#endif
+
 
 int main(int argc, char **argv ) {
+    if( open_all_network_ports() ) {
+        close_all_network_ports();
+    }
     return 0;
 }
