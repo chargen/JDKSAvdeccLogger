@@ -15,10 +15,10 @@ add_executable("jdksavdecc-logger" "jdksavdecc-logger.h" "jdksavdecc-logger.c" $
 target_link_libraries("jdksavdecc-logger" ${LIBS})
 
 if(APPLE)
-  add_definitions( -DUS_ENABLE_PCAP=1 )
+  add_definitions( -DUS_ENABLE_PCAP=1 -DUS_CONFIG_POSIX=1)
   target_link_libraries( "jdksavdecc-logger" pcap)
 elseif(UNIX)
-  add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 )
+    add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 -US_CONFIG_POSIX=1)
 elseif(WIN32)
   add_definitions( -DUS_ENABLE_PCAP=1 )
   target_link_libraries("jdksavdecc-logger" wpcap Iphlpapi Ws2_32)
