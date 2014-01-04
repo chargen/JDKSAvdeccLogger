@@ -28,30 +28,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "us_world.h"
 #include "jdksavdecc.h"
+#include "jdksavdecc_adp_print.h"
 
 #include "us_rawnet.h"
 
-bool open_all_network_ports(void);
-void close_all_network_ports(void);
-int receive_avdecc_from_all_ports(
-    bool (*handler)(uint8_t *buf, uint16_t len )
-    );
-void send_avdecc_to_all_ports(
-    uint8_t *data,
-    uint16_t len,
-    uint8_t const *data1,
-    uint16_t len1,
-    uint8_t const *data2,
-    uint16_t len2
-     );
-void send_avdecc_response_to_all_ports(
-    uint8_t *data,
-    uint16_t len,
-    uint8_t const *data1,
-    uint16_t len1,
-    uint8_t const *data2,
-    uint16_t len2
-     );
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-#define MAX_ETHERNET_PORTS (16)
+#ifdef __cplusplus
+}
+#endif
