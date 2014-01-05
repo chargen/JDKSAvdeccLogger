@@ -76,7 +76,7 @@ struct jdksavdecc_eui64 jdks_log_vendor_id = JDKSAVDECC_JDKS_AEM_CONTROL_LOG_TEX
 #define JDKSAVDECC_JDKS_LOG_CONTROL_MAX_TEXT_LEN (JDKSAVDECC_AEM_CONTROL_VALUE_TYPE_BLOB_MAX_SIZE - JDKSAVDECC_JDKS_LOG_CONTROL_HEADER_LEN - JDKSAVDECC_AEM_COMMAND_SET_CONTROL_RESPONSE_LEN)
 
 
-struct jdksavdecc_jdks_log_control_value {
+struct jdksavdecc_jdks_log_control {
     struct jdksavdecc_aem_command_set_control_response cmd;
     struct jdksavdecc_eui64 vendor_eui64;
     uint16_t blob_size;
@@ -87,15 +87,15 @@ struct jdksavdecc_jdks_log_control_value {
     uint8_t text[JDKSAVDECC_JDKS_LOG_CONTROL_MAX_TEXT_LEN+1];
 };
 
-ssize_t JDKSAVDECC_JDKS_LOG_CONTROL_read(
-    struct jdksavdecc_jdks_log_control_value *p,
+ssize_t jdksavdecc_jdks_log_control_read(
+    struct jdksavdecc_jdks_log_control *p,
     void const *buf,
     ssize_t pos,
     size_t len);
 
 
-ssize_t JDKSAVDECC_JDKS_LOG_CONTROL_read(
-    struct jdksavdecc_jdks_log_control_value *p,
+ssize_t jdksavdecc_jdks_log_control_read(
+    struct jdksavdecc_jdks_log_control *p,
     void const *buf,
     ssize_t pos,
     size_t len) {
@@ -231,8 +231,8 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                     }
                 }
                 if( allow ) {
-                    struct jdksavdecc_jdks_log_control_value log_msg;
-                    if( JDKSAVDECC_JDKS_LOG_CONTROL_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
+                    struct jdksavdecc_jdks_log_control log_msg;
+                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
                         fprintf(stdout,"%" PRIx64 ":%" PRIx16 ":%" PRIx16 ":%" PRIx8 ":%s\n",
                             jdksavdecc_eui64_convert_to_uint64( &log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id ),
                             log_msg.source_descriptor_type,
