@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "jdksavdecc-logger.h"
 #include <stdint.h>
+#include <time.h>
 #include "us_allocator.h"
 #include "us_rawnet_multi.h"
 #include "us_logger_stdio.h"
@@ -62,6 +63,7 @@ us_getopt_option_t option[] = {
 
 struct jdksavdecc_eui48 jdks_log_mac = JDKSAVDECC_JDKS_MULTICAST_LOG;
 struct jdksavdecc_eui64 jdks_log_vendor_id = JDKSAVDECC_JDKS_AEM_CONTROL_LOG_TEXT;
+us_rawnet_multi_t multi_rawnet;
 
 
 
@@ -98,7 +100,7 @@ ssize_t jdksavdecc_jdks_log_control_read(
                     uint16_t text_len =p->blob_size - (JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_TEXT-JDKSAVDECC_AEM_COMMAND_SET_CONTROL_RESPONSE_LEN);
                     if( text_len < JDKSAVDECC_JDKS_LOG_CONTROL_MAX_TEXT_LEN ) {
                         r=pos+JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_TEXT;
-                        memcpy( p->text, buf+r, text_len);
+                        memcpy( p->text, (uint8_t const *)buf+r, text_len);
                         p->text[text_len+1]='\0';
                         r+=text_len;
                     } else {
@@ -244,7 +246,6 @@ int main(int argc, const char **argv ) {
         return 0;
     }
 
-    us_rawnet_multi_t multi_rawnet;
     us_logger_stdio_start(stdout, stderr);
     us_log_set_level(US_LOG_LEVEL_DEBUG);
 

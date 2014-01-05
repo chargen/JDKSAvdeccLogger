@@ -11,7 +11,6 @@ jdksavdecc-c/include/jdksavdecc.h jdksavdecc-c/include/jdksavdecc_acmp.h jdksavd
 set( MICROSUPPORT_C_FILES microsupport/src/us_allocator.c  microsupport/src/us_buffer.c microsupport/src/us_buffer_print.c microsupport/src/us_getopt.c microsupport/src/us_logger.c microsupport/src/us_logger_printer.c microsupport/src/us_logger_stdio.c microsupport/src/us_logger_syslog.c  microsupport/src/us_parse.c microsupport/src/us_platform.c microsupport/src/us_print.c microsupport/src/us_rawnet.c microsupport/include/us_rawnet.h microsupport/src/us_time.c microsupport/src/us_rawnet_multi.c microsupport/include/us_rawnet_multi.h microsupport/src/us_world.c microsupport/include/us_net.h microsupport/src/us_net.c microsupport/include/us_getopt.h )
 
 add_executable("jdksavdecc-logger" "jdksavdecc-logger.h" "jdksavdecc-logger.c" ${MICROSUPPORT_C_FILES} ${JDKSAVDECC_C_FILES})
-target_link_libraries("jdksavdecc-logger" ${LIBS})
 
 if(APPLE)
   add_definitions( -DUS_ENABLE_PCAP=1 -DUS_CONFIG_POSIX=1)
@@ -22,6 +21,13 @@ elseif(WIN32)
   add_definitions( -DUS_ENABLE_PCAP=1 )
   target_link_libraries("jdksavdecc-logger" wpcap Iphlpapi Ws2_32)
   include_directories( $ENV{WPCAP_DIR}/Include )
+  if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    link_directories( $ENV{WPCAP_DIR}/Lib/x64 )
+  elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+    link_directories( $ENV{WPCAP_DIR}/Lib )
+  endif()
 endif()
+
+target_link_libraries("jdksavdecc-logger" ${LIBS})
 
 
