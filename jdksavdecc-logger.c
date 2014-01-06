@@ -231,7 +231,7 @@ int main(int argc, const char **argv ) {
             }
 #endif
             // poll even if select thinks there are no readable sockets
-            us_rawnet_multi_rawnet_poll_incoming( &multi_rawnet, cur_time, 1, 0, incoming_packet_handler );
+            us_rawnet_multi_rawnet_poll_incoming( &multi_rawnet, cur_time, 128, 0, incoming_packet_handler );
         }
 
         us_rawnet_multi_close(&multi_rawnet);
