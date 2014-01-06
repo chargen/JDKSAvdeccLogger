@@ -11,9 +11,9 @@ jdksavdecc-c/include/jdksavdecc.h jdksavdecc-c/include/jdksavdecc_acmp.h jdksavd
 set( MICROSUPPORT_C_FILES microsupport/src/us_allocator.c  microsupport/src/us_buffer.c microsupport/src/us_buffer_print.c microsupport/src/us_getopt.c microsupport/src/us_logger.c microsupport/src/us_logger_printer.c microsupport/src/us_logger_stdio.c microsupport/src/us_logger_syslog.c  microsupport/src/us_parse.c microsupport/src/us_platform.c microsupport/src/us_print.c microsupport/src/us_rawnet.c microsupport/include/us_rawnet.h microsupport/src/us_time.c microsupport/src/us_rawnet_multi.c microsupport/include/us_rawnet_multi.h microsupport/src/us_world.c microsupport/include/us_net.h microsupport/src/us_net.c microsupport/include/us_getopt.h )
 
 if(APPLE)
-  add_definitions( -DUS_ENABLE_PCAP=1 -DUS_CONFIG_POSIX=1)
+  add_definitions( -DUS_ENABLE_PCAP=1 -DTARGET_PLATFORM_POSIX=1)
 elseif(UNIX)
-    add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 -DUS_CONFIG_POSIX=1)
+  add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 -DTARGET_PLATFORM_POSIX=1)
 elseif(WIN32)
   add_definitions( -DUS_ENABLE_PCAP=1 )
   include_directories( $ENV{WPCAP_DIR}/Include )
