@@ -257,6 +257,9 @@ int main(int argc, const char **argv ) {
 
         while(!us_platform_sigint_seen && !us_platform_sigterm_seen ) {
             time_t cur_time = time(0);
+#if defined(WIN32)
+            Sleep(100);
+#else
             fd_set readable;
             int largest_fd=-1;
             int s;
@@ -274,7 +277,7 @@ int main(int argc, const char **argv ) {
                 us_log_error( "Unable to select" );
                 break;
             }
-
+#endif
             // poll even if select thinks there are no readable sockets
             us_rawnet_multi_rawnet_poll_incoming( &multi_rawnet, cur_time, 256, 0, incoming_packet_handler );
         }
