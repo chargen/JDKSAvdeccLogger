@@ -79,11 +79,11 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
             // filter out non-interesting entity id's if we are asked to
             if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                 allow=false;
-                if( jdksavdecc_eui64_compare(&acmp.controller_entity_id, &option_entity_eui64 )) {
+                if( jdksavdecc_eui64_compare(&acmp.controller_entity_id, &option_entity_eui64 )==0) {
                     allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.talker_entity_id, &option_entity_eui64 )) {
+                } else if( jdksavdecc_eui64_compare(&acmp.talker_entity_id, &option_entity_eui64 )==0) {
                     allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.listener_entity_id, &option_entity_eui64 )) {
+                } else if( jdksavdecc_eui64_compare(&acmp.listener_entity_id, &option_entity_eui64 )==0) {
                     allow=true;
                 }
             }
@@ -103,7 +103,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
             // filter out non-interesting entity id's if we are asked to
             if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                 allow=false;
-                if( jdksavdecc_eui64_compare(&adp.header.entity_id, &option_entity_eui64 )) {
+                if( jdksavdecc_eui64_compare(&adp.header.entity_id, &option_entity_eui64 )==0) {
                     allow=true;
                 }
             }
@@ -122,9 +122,9 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
             // filter out non-interesting entity id's if we are asked to
             if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                 allow=false;
-                if( jdksavdecc_eui64_compare(&aecpdu.controller_entity_id, &option_entity_eui64 )) {
+                if( jdksavdecc_eui64_compare(&aecpdu.controller_entity_id, &option_entity_eui64 )==0) {
                     allow=true;
-                } else if( jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_entity_eui64 )) {
+                } else if( jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_entity_eui64 )==0) {
                     allow=true;
                 }
             }
@@ -147,19 +147,20 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                 // filter out non-interesting entity id's if we are asked to
                 if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                     allow=false;
-                    if( jdksavdecc_eui64_compare(&aem.controller_entity_id, &option_entity_eui64 )) {
+                    if( jdksavdecc_eui64_compare(&aem.controller_entity_id, &option_entity_eui64 )==0) {
                         allow=true;
-                    } else if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )) {
+                    } else if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
                         allow=true;
                     }
                 }
                 if( allow ) {
                     struct jdksavdecc_jdks_log_control log_msg;
                     if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
-                        fprintf(stdout,"%" PRIx64 ":%" PRIx16 ":%" PRIx16 ":%" PRIx8 ":%s\n",
+                        fprintf(stdout,"%" PRIx64 ":%" PRIx16 ":%" PRIx16 ":%" PRIx16 ":%" PRIx8 ":%s\n",
                             jdksavdecc_eui64_convert_to_uint64( &log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id ),
                             log_msg.source_descriptor_type,
                             log_msg.source_descriptor_index,
+                            log_msg.log_sequence_id,
                             log_msg.log_detail,
                             log_msg.text );
                     }
