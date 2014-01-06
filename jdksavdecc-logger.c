@@ -61,61 +61,10 @@ us_getopt_option_t option[] = {
     {0,0,0,0}
 };
 
-struct jdksavdecc_eui48 jdks_log_mac = JDKSAVDECC_JDKS_MULTICAST_LOG;
-struct jdksavdecc_eui64 jdks_log_vendor_id = JDKSAVDECC_JDKS_AEM_CONTROL_LOG_TEXT;
 us_rawnet_multi_t multi_rawnet;
 
 
 
-
-ssize_t jdksavdecc_jdks_log_control_read(
-    struct jdksavdecc_jdks_log_control *p,
-    void const *buf,
-    ssize_t pos,
-    size_t len) {
-    ssize_t r = jdksavdecc_validate_range(pos,len,JDKSAVDECC_JDKS_LOG_CONTROL_HEADER_LEN);
-    if( r>=0 ) {
-        jdksavdecc_eui64_read(&p->vendor_eui64, buf, JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_VENDOR_EUI64+pos, len);
-        if( jdksavdecc_eui64_compare(&jdks_log_vendor_id,&p->vendor_eui64)==0 ) {
-            jdksavdecc_uint16_read(&p->blob_size, buf, JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_BLOB_SIZE+pos);
-            if( p->blob_size > (JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_TEXT-JDKSAVDECC_AEM_COMMAND_SET_CONTROL_RESPONSE_LEN) &&
-                p->blob_size <= JDKSAVDECC_AEM_CONTROL_VALUE_TYPE_BLOB_MAX_SIZE ) {
-                jdksavdecc_uint16_read(
-                    &p->source_descriptor_type,
-                    buf,
-                    JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_SOURCE_DESCRIPTOR_TYPE+pos);
-
-                jdksavdecc_uint16_read(
-                    &p->source_descriptor_index,
-                    buf,
-                    JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_SOURCE_DESCRIPTOR_INDEX +pos);
-
-                jdksavdecc_uint8_read(
-                    &p->log_detail,
-                    buf,
-                    JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_LOG_DETAIL,
-                    len );
-
-                {
-                    uint16_t text_len =p->blob_size - (JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_TEXT-JDKSAVDECC_AEM_COMMAND_SET_CONTROL_RESPONSE_LEN);
-                    if( text_len < JDKSAVDECC_JDKS_LOG_CONTROL_MAX_TEXT_LEN ) {
-                        r=pos+JDKSAVDECC_JDKS_LOG_CONTROL_OFFSET_TEXT;
-                        memcpy( p->text, (uint8_t const *)buf+r, text_len);
-                        p->text[text_len+1]='\0';
-                        r+=text_len;
-                    } else {
-                        r=-1;
-                    }
-                }
-            } else {
-                r=-1;
-            }
-        } else {
-        r=-1;
-        }
-    }
-    return r;
-}
 
 
 void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *context, uint8_t *buf, uint16_t len ) {
@@ -188,7 +137,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
             }
         }
     } else if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
-        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdks_log_mac.value, 6 )==0 ) {
+        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
         struct jdksavdecc_aecpdu_aem aem;
         if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_ADDRESS_ACCESS_RESPONSE
@@ -253,7 +202,7 @@ int main(int argc, const char **argv ) {
         &multi_rawnet,
         JDKSAVDECC_AVTP_ETHERTYPE,
         jdksavdecc_multicast_adp_acmp.value,
-        jdks_log_mac.value)>0 ) {
+        jdksavdecc_jdks_multicast_log.value)>0 ) {
 
         while(!us_platform_sigint_seen && !us_platform_sigterm_seen ) {
             time_t cur_time = time(0);
