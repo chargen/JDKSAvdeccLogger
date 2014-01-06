@@ -13,7 +13,7 @@ set( MICROSUPPORT_C_FILES microsupport/src/us_allocator.c  microsupport/src/us_b
 if(APPLE)
   add_definitions( -DUS_ENABLE_PCAP=1 -DUS_CONFIG_POSIX=1)
 elseif(UNIX)
-    add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 -US_CONFIG_POSIX=1)
+    add_definitions( -DUS_ENABLE_RAW_ETHERNET=1 -DUS_CONFIG_POSIX=1)
 elseif(WIN32)
   add_definitions( -DUS_ENABLE_PCAP=1 )
   include_directories( $ENV{WPCAP_DIR}/Include )
