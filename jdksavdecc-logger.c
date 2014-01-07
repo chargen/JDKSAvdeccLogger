@@ -131,9 +131,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
             if( allow ) {
                 jdksavdecc_printer_print(&print,"AECP:");
                 jdksavdecc_printer_print_eol(&print);
-//              jdksavdecc_aecpdu_common_print(&print, &aecp);
-                jdksavdecc_printer_print_block(&print, buf, len, 0, len);
-                jdksavdecc_printer_print_eol(&print);
+                jdksavdecc_aecp_print(&print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
             }
         }
     } else if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
@@ -147,7 +145,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                 // filter out non-interesting entity id's if we are asked to
                 if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                     allow=false;
-                    if( jdksavdecc_eui64_compare(&aem.controller_entity_id, &option_entity_eui64 )==0) {
+                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &option_entity_eui64 )==0) {
                         allow=true;
                     } else if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
                         allow=true;
