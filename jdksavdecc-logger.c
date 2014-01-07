@@ -145,11 +145,12 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                 // filter out non-interesting entity id's if we are asked to
                 if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
                     allow=false;
-                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &option_entity_eui64 )==0) {
-                        allow=true;
-                    } else if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
+                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
                         allow=true;
                     }
+                }
+                if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &jdksavdecc_jdks_notifications_controller_entity_id )==0) {
+                    allow=true;
                 }
                 if( allow ) {
                     struct jdksavdecc_jdks_log_control log_msg;
