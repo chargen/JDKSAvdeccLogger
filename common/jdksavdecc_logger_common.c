@@ -30,6 +30,7 @@
 */
 
 #include "jdksavdecc_logger_common.h"
+#include "jdksavdecc_aem_print.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -240,17 +241,25 @@ void jdksavdecc_logger_print_jdkslog_frame(
                             level = "unknown";
                             break;
                         }
-                        //snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s",
-                        //TODO: print entity id in portable way
-                        char tmp[1500];
-                        snprintf(tmp,sizeof(tmp),"JDKSLOG:%-8s:0x%016lx:%04x:%04x:%04x:%s",
-                                 level,
-                                 target_entity_id,
-                                 log_msg.source_descriptor_type,
-                                 log_msg.source_descriptor_index,
-                                 log_msg.log_sequence_id,
-                                 log_msg.text );
-                        jdksavdecc_printer_print(print,tmp);
+                        jdksavdecc_printer_print(print,"JDKSLOG");
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print(print,level);
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_printc(print,'[');
+                        jdksavdecc_printer_print_eui64(print,log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
+                        jdksavdecc_printer_printc(print,']');
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print_uint16_name(
+                                    print,
+                                    jdksavdecc_aem_print_descriptor_type,
+                                    log_msg.source_descriptor_type );
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print_uint16(print,log_msg.source_descriptor_index);
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print_uint16(print,log_msg.log_sequence_id);
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print(print,(char *)log_msg.text);
+
                     }
                 }
             }
