@@ -26,11 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "us_world.h"
-#include "jdksavdecc.h"
-#include "jdksavdecc_adp_print.h"
-
-#include "us_rawnet.h"
+#include "jdksavdecc_logger_common.h"
 
 #ifdef __cplusplus
 extern "C" {
