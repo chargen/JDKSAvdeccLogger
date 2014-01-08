@@ -16,6 +16,46 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QLabel" name="labelTitle">
+      <property name="font">
+       <font>
+        <pointsize>17</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel { 
+	qproperty-alignment: AlignCenter; 
+}</string>
+      </property>
+      <property name="text">
+       <string>IEEE Std 1722.1-2013 (AVDECC) Logger v1.0</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelCopyright">
+      <property name="styleSheet">
+       <string notr="true">QLabel { qproperty-alignment: AlignCenter; }</string>
+      </property>
+      <property name="text">
+       <string>Copyright 2014 by J.D. Koftinoff Software, Ltd.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelLinks">
+      <property name="styleSheet">
+       <string notr="true">QLabel { qproperty-alignment: AlignCenter; }</string>
+      </property>
+      <property name="text">
+       <string>https://github.com/jdkoftinoff/JDKSAvdeccLogger</string>
+      </property>
+      <property name="openExternalLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QWidget" name="widget" native="true">
       <property name="minimumSize">
        <size>
@@ -23,90 +63,126 @@
         <height>61</height>
        </size>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QCheckBox" name="checkBoxADP">
+       <property name="geometry">
+        <rect>
+         <x>177</x>
+         <y>5</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ADP</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxAECP">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>5</y>
+         <width>58</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>AECP</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxACMP">
+       <property name="geometry">
+        <rect>
+         <x>177</x>
+         <y>32</y>
+         <width>62</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ACMP</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditEntityID">
+       <property name="geometry">
+        <rect>
+         <x>410</x>
+         <y>4</y>
+         <width>191</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>191</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Consolas</family>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxEntityID">
+       <property name="geometry">
+        <rect>
+         <x>326</x>
+         <y>5</y>
+         <width>83</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Entity ID:</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxJDKSLOG">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>32</y>
+         <width>85</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>JDKS LOG</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonEnable">
+       <property name="geometry">
+        <rect>
+         <x>87</x>
+         <y>12</y>
+         <width>84</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Enable</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>0</y>
-         <width>592</width>
-         <height>56</height>
+         <y>12</y>
+         <width>75</width>
+         <height>32</height>
         </rect>
        </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0" rowspan="2">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>Clear</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" rowspan="2">
-         <widget class="QPushButton" name="pushButtonEnable">
-          <property name="text">
-           <string>Enable</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QCheckBox" name="checkBoxADP">
-          <property name="text">
-           <string>ADP</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QCheckBox" name="checkBoxAECP">
-          <property name="text">
-           <string>AECP</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QCheckBox" name="checkBoxEntityID">
-          <property name="text">
-           <string>Entity ID:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLineEdit" name="lineEditEntityID">
-          <property name="minimumSize">
-           <size>
-            <width>191</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Consolas</family>
-           </font>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QCheckBox" name="checkBoxACMP">
-          <property name="text">
-           <string>ACMP</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QCheckBox" name="checkBoxJDKSLOG">
-          <property name="text">
-           <string>JDKS LOG</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="text">
+        <string>Clear</string>
+       </property>
       </widget>
      </widget>
     </item>
