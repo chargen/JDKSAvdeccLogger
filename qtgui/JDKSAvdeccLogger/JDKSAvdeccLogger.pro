@@ -35,6 +35,7 @@ win32-msvc*:contains(QMAKE_TARGET.arch, x86):{
     LIBS+=-L$$(WCAP_DIR)/Lib
 }
 
+COMMON_DIR=$$_PRO_FILE_PWD_/../../common
 JDKSAVDECC_C_DIR=$$_PRO_FILE_PWD_/../../jdksavdecc-c
 JDKSAVDECC_C_INCLUDE_DIR=$$JDKSAVDECC_C_DIR/include
 JDKSAVDECC_C_SOURCE_DIR=$$JDKSAVDECC_C_DIR/src
@@ -45,7 +46,8 @@ MICROSUPPORT_SOURCE_DIR=$$MICROSUPPORT_DIR/src
 
 INCLUDEPATH+=$$JDKSAVDECC_C_INCLUDE_DIR
 INCLUDEPATH+=$$MICROSUPPORT_INCLUDE_DIR
-DEPENDPATH+=$$JDKSAVDECC_C_INCLUDE_DIR $$MICROSUPPORT_INCLUDE_DIR $$_PRO_FILE_PWD_
+INCLUDEPATH+=$$COMMON_DIR
+DEPENDPATH+=$$JDKSAVDECC_C_INCLUDE_DIR $$MICROSUPPORT_INCLUDE_DIR $$COMMON_DIR $$_PRO_FILE_PWD_
 
 JDKSAVDECC_C_SOURCES += \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc.c \
@@ -132,11 +134,13 @@ SOURCES +=\
         MainWindow.cpp \
         $$JDKSAVDECC_C_SOURCES \
         $$MICROSUPPORT_SOURCES \
-        JDKSAvdeccLogger.cpp
+        JDKSAvdeccLogger.cpp \
+        $$COMMON_DIR/jdksavdecc_logger_common.c
 
 HEADERS  += MainWindow.hpp \
         $$JDKSAVDECC_C_HEADERS \
         $$MICROSUPPORT_HEADERS \
-        JDKSAvdeccLogger.hpp
+        JDKSAvdeccLogger.hpp \
+        $$COMMON_DIR/jdksavdecc_logger_common.h
 
 FORMS    += MainWindow.ui

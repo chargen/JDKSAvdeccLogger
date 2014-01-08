@@ -20,27 +20,6 @@
 #ifndef JDKSAVDECCLOGGER_HPP
 #define JDKSAVDECCLOGGER_HPP
 
-#include "us_world.h"
-#include "jdksavdecc.h"
-#include "jdksavdecc_adp_print.h"
-#include "us_rawnet.h"
-#include <inttypes.h>
-#include <stdint.h>
-#include <time.h>
-#include "us_allocator.h"
-#include "us_rawnet_multi.h"
-#include "us_logger_stdio.h"
-#include "us_getopt.h"
-
-
-extern us_rawnet_multi_t multi_rawnet;
-extern bool option_help;
-extern bool option_dump;
-extern int16_t option_adp;
-extern int16_t option_acmp;
-extern int16_t option_aecp;
-extern int16_t option_jdkslog;
-extern uint64_t option_entity;
-extern struct jdksavdecc_eui64 option_entity_eui64;
+#include "jdksavdecc_logger_common.h"
 
 #endif // JDKSAVDECCLOGGER_HPP
