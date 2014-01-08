@@ -72,7 +72,64 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
     struct jdksavdecc_printer print;
     jdksavdecc_printer_init(&print, text, sizeof(text));
 
-    if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
+    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
+        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
+        struct jdksavdecc_aecpdu_aem aem;
+        if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
+            if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
+                && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL ) {
+                bool allow=true;
+
+                // filter out non-interesting entity id's if we are asked to
+                if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
+                    allow=false;
+                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
+                        allow=true;
+                    }
+                }
+                if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &jdksavdecc_jdks_notifications_controller_entity_id )==0) {
+                    allow=true;
+                }
+                if( allow ) {
+                    struct jdksavdecc_jdks_log_control log_msg;
+                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
+                        const char *level;
+                        uint64_t target_entity_id = jdksavdecc_eui64_convert_to_uint64( &log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
+                        switch (log_msg.log_detail) {
+                        case JDKSAVDECC_JDKS_LOG_ERROR:
+                            level = "ERROR";
+                            break;
+                        case JDKSAVDECC_JDKS_LOG_WARNING:
+                            level = "WARNING";
+                            break;
+                        case JDKSAVDECC_JDKS_LOG_INFO:
+                            level = "INFO";
+                            break;
+                        case JDKSAVDECC_JDKS_LOG_DEBUG1:
+                            level = "DEBUG1";
+                            break;
+                        case JDKSAVDECC_JDKS_LOG_DEBUG2:
+                            level = "DEBUG2";
+                            break;
+                        case JDKSAVDECC_JDKS_LOG_DEBUG3:
+                            level = "DEBUG3";
+                            break;
+                        default:
+                            level = "unknown";
+                            break;
+                        }
+                        fprintf(stdout,"JDKSLOG:%s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s\n",
+                            level,
+                            target_entity_id,
+                            log_msg.source_descriptor_type,
+                            log_msg.source_descriptor_index,
+                            log_msg.log_sequence_id,
+                            log_msg.text );
+                    }
+                }
+            }
+        }
+    } else if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
         struct jdksavdecc_acmpdu acmp;
         if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             bool allow=true;
@@ -132,38 +189,6 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                 jdksavdecc_printer_print(&print,"AECP:");
                 jdksavdecc_printer_print_eol(&print);
                 jdksavdecc_aecp_print(&print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
-            }
-        }
-    } else if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
-        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
-        struct jdksavdecc_aecpdu_aem aem;
-        if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_ADDRESS_ACCESS_RESPONSE
-                && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL ) {
-                bool allow=true;
-
-                // filter out non-interesting entity id's if we are asked to
-                if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                    allow=false;
-                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
-                        allow=true;
-                    }
-                }
-                if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &jdksavdecc_jdks_notifications_controller_entity_id )==0) {
-                    allow=true;
-                }
-                if( allow ) {
-                    struct jdksavdecc_jdks_log_control log_msg;
-                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
-                        fprintf(stdout,"%" PRIx64 ":%" PRIx16 ":%" PRIx16 ":%" PRIx16 ":%" PRIx8 ":%s\n",
-                            jdksavdecc_eui64_convert_to_uint64( &log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id ),
-                            log_msg.source_descriptor_type,
-                            log_msg.source_descriptor_index,
-                            log_msg.log_sequence_id,
-                            log_msg.log_detail,
-                            log_msg.text );
-                    }
-                }
             }
         }
     }
