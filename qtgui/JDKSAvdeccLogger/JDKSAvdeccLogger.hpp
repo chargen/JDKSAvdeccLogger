@@ -24,6 +24,7 @@
 #include "jdksavdecc.h"
 #include "jdksavdecc_adp_print.h"
 #include "us_rawnet.h"
+#include <inttypes.h>
 #include <stdint.h>
 #include <time.h>
 #include "us_allocator.h"

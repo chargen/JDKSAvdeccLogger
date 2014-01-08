@@ -137,7 +137,8 @@ void MainWindow::incomingAvdeccPacket(
                             level = "unknown";
                             break;
                         }
-                        snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s",
+                        //snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s",
+                        snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016lx:%04x:%04x:%04x:%s",
                             level,
                             target_entity_id,
                             log_msg.source_descriptor_type,
