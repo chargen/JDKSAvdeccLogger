@@ -77,26 +77,103 @@ void MainWindow::settingsChanged() {
     }
 }
 
+void jdksavdecc_logger_print_aecp_frame(
+        struct jdksavdecc_printer *print,
+        struct timeval *tv,
+        uint8_t const *buf,
+        uint16_t len )
+{
+    if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
+        struct jdksavdecc_aecpdu_common aecpdu;
+        if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
+            bool allow=true;
 
-void MainWindow::incomingAvdeccPacket(
-        us_rawnet_multi_t *multiport,
-        int ethernet_port,
-        uint8_t *buf,
+            // filter out non-interesting entity id's if we are asked to
+            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
+                allow=false;
+                if( jdksavdecc_eui64_compare(&aecpdu.controller_entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                } else if( jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                }
+            }
+            if( allow ) {
+                jdksavdecc_printer_print(print,"AECP:");
+                jdksavdecc_printer_print_eol(print);
+                jdksavdecc_aecp_print(print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
+            }
+        }
+    }
+}
+
+void jdksavdecc_logger_print_adp_frame(
+        struct jdksavdecc_printer *print,
+        struct timeval *tv,
+        uint8_t const *buf,
         uint16_t len ) {
-    (void)multiport;
-    (void)ethernet_port;
-    char text[4096]="";
-    struct timeval tv;
-    us_gettimeofday(&tv);
-    struct jdksavdecc_printer print;
-    jdksavdecc_printer_init(&print, text, sizeof(text));
+    if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ADP ) {
+        struct jdksavdecc_adpdu adp;
+        if( jdksavdecc_adpdu_read(&adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
+            bool allow=true;
+            // filter out non-interesting entity id's if we are asked to
+            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
+                allow=false;
+                if( jdksavdecc_eui64_compare(&adp.header.entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                }
+            }
+            if( allow ) {
+                jdksavdecc_printer_print(print,"ADP:");
+                jdksavdecc_printer_print_eol(print);
+                jdksavdecc_adpdu_print(print, &adp);
+                jdksavdecc_printer_print_eol(print);
+            }
+        }
+    }
+}
 
+void jdksavdecc_logger_print_acmp_frame(
+        struct jdksavdecc_printer *print,
+        struct timeval *tv,
+        uint8_t const *buf,
+        uint16_t len ) {
+    if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
+        struct jdksavdecc_acmpdu acmp;
+        if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
+            bool allow=true;
+            // filter out non-interesting entity id's if we are asked to
+            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
+                allow=false;
+                if( jdksavdecc_eui64_compare(&acmp.controller_entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                } else if( jdksavdecc_eui64_compare(&acmp.talker_entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                } else if( jdksavdecc_eui64_compare(&acmp.listener_entity_id, &option_entity_eui64 )==0) {
+                    allow=true;
+                }
+            }
+
+            if( allow ) {
+                jdksavdecc_printer_print(print,"ACMP:");
+                jdksavdecc_printer_print_eol(print);
+                jdksavdecc_acmpdu_print(print, &acmp);
+                jdksavdecc_printer_print_eol(print);
+            }
+        }
+    }
+}
+
+void jdksavdecc_logger_print_jdkslog_frame(
+        struct jdksavdecc_printer *print,
+        struct timeval *tv,
+        uint8_t const *buf,
+        uint16_t len ) {
     if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
-        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
+            && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
         struct jdksavdecc_aecpdu_aem aem;
         if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
-                && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL ) {
+                    && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL ) {
                 bool allow=true;
 
                 // filter out non-interesting entity id's if we are asked to
@@ -138,84 +215,52 @@ void MainWindow::incomingAvdeccPacket(
                             break;
                         }
                         //snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s",
-                        snprintf(text,sizeof(text),"JDKSLOG:%-8s:0x%016lx:%04x:%04x:%04x:%s",
-                            level,
-                            target_entity_id,
-                            log_msg.source_descriptor_type,
-                            log_msg.source_descriptor_index,
-                            log_msg.log_sequence_id,
-                            log_msg.text );
+                        //TODO: print entity id in portable way
+                        char tmp[1500];
+                        snprintf(tmp,sizeof(tmp),"JDKSLOG:%-8s:0x%016lx:%04x:%04x:%04x:%s",
+                                 level,
+                                 target_entity_id,
+                                 log_msg.source_descriptor_type,
+                                 log_msg.source_descriptor_index,
+                                 log_msg.log_sequence_id,
+                                 log_msg.text );
+                        jdksavdecc_printer_print(print,tmp);
                     }
                 }
             }
         }
-    } else if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
-        struct jdksavdecc_acmpdu acmp;
-        if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
-            // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&acmp.controller_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.talker_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.listener_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                }
-            }
+    }
+}
 
-            if( allow ) {
-                jdksavdecc_printer_print(&print,"ACMP:");
-                jdksavdecc_printer_print_eol(&print);
-                jdksavdecc_acmpdu_print(&print, &acmp);
-                jdksavdecc_printer_print_eol(&print);
-            }
-        }
+
+void MainWindow::incomingAvdeccPacket(
+        us_rawnet_multi_t *multiport,
+        int ethernet_port,
+        uint8_t *buf,
+        uint16_t len ) {
+    (void)multiport;
+    (void)ethernet_port;
+    char text[4096]="";
+    struct timeval tv;
+    us_gettimeofday(&tv);
+    struct jdksavdecc_printer print;
+    jdksavdecc_printer_init(&print, text, sizeof(text));
+
+    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
+        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
+        jdksavdecc_logger_print_jdkslog_frame(&print,&tv,buf,len);
+    } else if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
+        jdksavdecc_logger_print_acmp_frame(&print,&tv,buf,len);
     }
     else if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ADP ) {
-        struct jdksavdecc_adpdu adp;
-        if( jdksavdecc_adpdu_read(&adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
-            // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&adp.header.entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                }
-            }
-            if( allow ) {
-                jdksavdecc_printer_print(&print,"ADP:");
-                jdksavdecc_printer_print_eol(&print);
-                jdksavdecc_adpdu_print(&print, &adp);
-                jdksavdecc_printer_print_eol(&print);
-            }
-        }
+        jdksavdecc_logger_print_adp_frame(&print,&tv,buf,len);
     } else if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
-        struct jdksavdecc_aecpdu_common aecpdu;
-        if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
-
-            // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&aecpdu.controller_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                }
-            }
-            if( allow ) {
-                jdksavdecc_printer_print(&print,"AECP:");
-                jdksavdecc_printer_print_eol(&print);
-                jdksavdecc_aecp_print(&print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
-            }
-        }
+        jdksavdecc_logger_print_aecp_frame(&print,&tv,buf,len);
     }
     if( *text!=0 ) {
-        ui->commonLogText->append(QString("%1.%2:%3").arg(tv.tv_sec,10).arg(tv.tv_usec,7).arg(text));
+        QString timestamp = QString("%1.%2").arg(tv.tv_sec).arg(tv.tv_usec);
+        ui->commonLogText->append(QString("%1:%2").arg(timestamp,17).arg(text));
     }
-
 }
 
 void MainWindow::incomingAvdeccPacketCallback(
