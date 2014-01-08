@@ -118,7 +118,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
                             level = "unknown";
                             break;
                         }
-                        fprintf(stdout,"JDKSLOG:%s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s\n",
+                        fprintf(stdout,"JDKSLOG:%-8s:0x%016" PRIx64 ":%04" PRIx16 ":%04" PRIx16 ":%04" PRIx16 ":%s\n",
                             level,
                             target_entity_id,
                             log_msg.source_descriptor_type,
