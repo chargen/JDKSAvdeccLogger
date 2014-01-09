@@ -252,13 +252,6 @@ void jdksavdecc_logger_print_jdkslog_frame(
                         jdksavdecc_printer_print_eui64(print,log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
                         jdksavdecc_printer_printc(print,']');
                         jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_print_uint16_name(
-                                    print,
-                                    jdksavdecc_aem_print_descriptor_type,
-                                    log_msg.source_descriptor_type );
-                        jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_print_uint16(print,log_msg.source_descriptor_index);
-                        jdksavdecc_printer_printc(print,':');
                         jdksavdecc_printer_print_uint16(print,log_msg.log_sequence_id);
                         jdksavdecc_printer_printc(print,':');
                         jdksavdecc_printer_print(print,(char *)log_msg.text);
