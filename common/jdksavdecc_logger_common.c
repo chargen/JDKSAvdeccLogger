@@ -110,6 +110,7 @@ void jdksavdecc_logger_print_aecp_frame(
         struct timeval *tv,
         uint8_t const *buf,
         uint16_t len ) {
+    (void)tv;
     if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
         struct jdksavdecc_aecpdu_common aecpdu;
         if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
@@ -138,6 +139,7 @@ void jdksavdecc_logger_print_adp_frame(
         struct timeval *tv,
         uint8_t const *buf,
         uint16_t len ) {
+    (void)tv;
     if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ADP ) {
         struct jdksavdecc_adpdu adp;
         if( jdksavdecc_adpdu_read(&adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
@@ -164,6 +166,7 @@ void jdksavdecc_logger_print_acmp_frame(
         struct timeval *tv,
         uint8_t const *buf,
         uint16_t len ) {
+    (void)tv;
     if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
         struct jdksavdecc_acmpdu acmp;
         if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
@@ -195,6 +198,7 @@ void jdksavdecc_logger_print_jdkslog_frame(
         struct timeval *tv,
         uint8_t const *buf,
         uint16_t len ) {
+    (void)tv;
     if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
             && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
         struct jdksavdecc_aecpdu_aem aem;
@@ -217,7 +221,6 @@ void jdksavdecc_logger_print_jdkslog_frame(
                     struct jdksavdecc_jdks_log_control log_msg;
                     if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
                         const char *level;
-                        uint64_t target_entity_id = jdksavdecc_eui64_convert_to_uint64( &log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
                         switch (log_msg.log_detail) {
                         case JDKSAVDECC_JDKS_LOG_ERROR:
                             level = "ERROR";
