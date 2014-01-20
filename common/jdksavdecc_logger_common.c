@@ -219,7 +219,7 @@ void jdksavdecc_logger_print_jdkslog_frame(
                 }
                 if( allow ) {
                     struct jdksavdecc_jdks_log_control log_msg;
-                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,JDKSAVDECC_FRAME_HEADER_LEN,len)>0 ) {
+                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,len)>0 ) {
                         const char *level;
                         switch (log_msg.log_detail) {
                         case JDKSAVDECC_JDKS_LOG_ERROR:
