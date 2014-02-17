@@ -36,12 +36,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void timerEvent(QTimerEvent *event);
-
 public slots:
     void settingsChanged();
 
 protected:
+    void timerEvent(QTimerEvent *event);
+
     virtual void incomingAvdeccPacket(
             us_rawnet_multi_t *self,
             int ethernet_port,
