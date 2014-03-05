@@ -199,8 +199,7 @@ void jdksavdecc_logger_print_jdkslog_frame(
         uint8_t const *buf,
         uint16_t len ) {
     (void)tv;
-    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
-            && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
+    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
         struct jdksavdecc_aecpdu_aem aem;
         if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
@@ -219,7 +218,8 @@ void jdksavdecc_logger_print_jdkslog_frame(
                 }
                 if( allow ) {
                     struct jdksavdecc_jdks_log_control log_msg;
-                    if( jdksavdecc_jdks_log_control_read(&log_msg,buf,len)>0 ) {
+                    ssize_t text_len = jdksavdecc_jdks_log_control_read(&log_msg,buf,len);
+                    if( text_len>=0) {
                         const char *level;
                         switch (log_msg.log_detail) {
                         case JDKSAVDECC_JDKS_LOG_ERROR:
@@ -252,7 +252,15 @@ void jdksavdecc_logger_print_jdkslog_frame(
                         jdksavdecc_printer_print_eui64(print,log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
                         jdksavdecc_printer_printc(print,']');
                         jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_print(print,(char *)log_msg.text);
+                        {
+                            uint16_t i;
+                            for( i=0; i<text_len; ++i ) {
+                                char c=(char)log_msg.text[i];
+                                if( isprint(c) ) {
+                                    jdksavdecc_printer_printc(print,c);
+                                }
+                            }
+                        }
 
                     }
                 }
