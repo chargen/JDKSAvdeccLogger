@@ -20,8 +20,8 @@
    <string>JDKSAvdeccLogger</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLabel { 
-	qproperty-alignment: AlignCenter; 
+   <string notr="true">QLabel {
+	qproperty-alignment: AlignCenter;
 	font: &quot;Sans&quot;;
 }
 
@@ -197,7 +197,7 @@ p, li { white-space: pre-wrap; }
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>IEEE Std 1722.1-2013 (AVDECC) Logger v1.1 - https://github.com/jdkoftinoff/JDKSAvdeccLogger</string>
+       <string>IEEE Std 1722.1-2013 (AVDECC) Logger v1.2 - https://github.com/jdkoftinoff/JDKSAvdeccLogger</string>
       </property>
       <property name="openExternalLinks">
        <bool>true</bool>
