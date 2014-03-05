@@ -35,8 +35,7 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
     struct jdksavdecc_printer print;
     jdksavdecc_printer_init(&print, text, sizeof(text));
 
-    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP
-        && memcmp( &buf[JDKSAVDECC_FRAME_HEADER_DA_OFFSET], jdksavdecc_jdks_multicast_log.value, 6 )==0 ) {
+    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
         jdksavdecc_logger_print_jdkslog_frame(&print,&tv,buf,len);
     } else if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
         jdksavdecc_logger_print_acmp_frame(&print,&tv,buf,len);
