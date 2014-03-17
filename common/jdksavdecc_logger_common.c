@@ -240,6 +240,9 @@ void jdksavdecc_logger_print_jdkslog_frame(
                         case JDKSAVDECC_JDKS_LOG_DEBUG3:
                             level = "DEBUG3";
                             break;
+                        case JDKSAVDECC_JDKS_LOG_CONSOLE:
+                            level = "CONSOLE";
+                            break;
                         default:
                             level = "unknown";
                             break;
@@ -251,6 +254,8 @@ void jdksavdecc_logger_print_jdkslog_frame(
                         jdksavdecc_printer_printc(print,'[');
                         jdksavdecc_printer_print_eui64(print,log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
                         jdksavdecc_printer_printc(print,']');
+                        jdksavdecc_printer_printc(print,':');
+                        jdksavdecc_printer_print_uint16(print,log_msg.cmd.descriptor_index);
                         jdksavdecc_printer_printc(print,':');
                         {
                             uint16_t i;
