@@ -214,11 +214,19 @@ void jdksavdecc_logger_print_jdkslog_frame(
                     }
                 }
                 if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &jdksavdecc_jdks_notifications_controller_entity_id )==0) {
-                    allow=true;
+                    allow&=true;
+                }
+                else {
+                    allow=false;
                 }
                 if( allow ) {
-                    struct jdksavdecc_jdks_log_control log_msg;
-                    ssize_t text_len = jdksavdecc_jdks_log_control_read(&log_msg,buf,len);
+                    struct jdksavdecc_jdks_log_control log_msg;                                       
+                    ssize_t text_len;
+                    memset(&log_msg,0,sizeof(log_msg) );
+                    text_len = jdksavdecc_jdks_log_control_read(&log_msg,buf,len);
+                    if( text_len<0 ) {
+                        jdksavdecc_printer_print(print,"JDKSLOG-ERROR");
+                    }
                     if( text_len>=0) {
                         const char *level;
                         switch (log_msg.log_detail) {
@@ -257,6 +265,7 @@ void jdksavdecc_logger_print_jdkslog_frame(
                         jdksavdecc_printer_printc(print,':');
                         jdksavdecc_printer_print_uint16(print,log_msg.cmd.descriptor_index);
                         jdksavdecc_printer_printc(print,':');
+                        
                         {
                             uint16_t i;
                             for( i=0; i<text_len; ++i ) {
