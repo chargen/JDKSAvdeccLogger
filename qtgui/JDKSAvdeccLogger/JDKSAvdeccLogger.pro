@@ -56,7 +56,6 @@ JDKSAVDECC_C_SOURCES += \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_aecp_print.c \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_aem_descriptor.c \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_aem_print.c \
-    $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_allocator.c \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_app.c \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_app_print.c \
     $$JDKSAVDECC_C_SOURCE_DIR/jdksavdecc_frame.c \
@@ -83,7 +82,6 @@ JDKSAVDECC_C_HEADERS += \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_aem_command.h \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_aem_descriptor.h \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_aem_print.h \
-    $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_allocator.h \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_app.h \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_app_print.h \
     $$JDKSAVDECC_C_INCLUDE_DIR/jdksavdecc_avr.h \
