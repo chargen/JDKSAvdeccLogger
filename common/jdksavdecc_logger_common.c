@@ -111,7 +111,7 @@ void jdksavdecc_logger_print_aecp_frame(
         uint8_t const *buf,
         uint16_t len ) {
     (void)tv;
-    if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
+    if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_AECP ) {
         struct jdksavdecc_aecpdu_common aecpdu;
         if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             bool allow=true;
@@ -140,7 +140,7 @@ void jdksavdecc_logger_print_adp_frame(
         uint8_t const *buf,
         uint16_t len ) {
     (void)tv;
-    if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ADP ) {
+    if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_ADP ) {
         struct jdksavdecc_adpdu adp;
         if( jdksavdecc_adpdu_read(&adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             bool allow=true;
@@ -167,7 +167,7 @@ void jdksavdecc_logger_print_acmp_frame(
         uint8_t const *buf,
         uint16_t len ) {
     (void)tv;
-    if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
+    if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_ACMP ) {
         struct jdksavdecc_acmpdu acmp;
         if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             bool allow=true;
@@ -199,7 +199,7 @@ void jdksavdecc_logger_print_jdkslog_frame(
         uint8_t const *buf,
         uint16_t len ) {
     (void)tv;
-    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
+    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_AECP ) {
         struct jdksavdecc_aecpdu_aem aem;
         if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
             if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
