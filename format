@@ -1,0 +1,2 @@
+clang-format -i */*.h */*.c qtgui/*/*.cpp qtgui/*/*.hpp
+
