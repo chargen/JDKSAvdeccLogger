@@ -20,15 +20,16 @@
 #include "MainWindow.hpp"
 #include <QApplication>
 
-int main(int argc, char const *argv[])
+int main( int argc, char const *argv[] )
 {
-    int r=255;
+    int r = 255;
 
-    if( jdksavdecc_logger_init(argv) ) {
-        QApplication a(argc, (char **)argv);
+    if ( jdksavdecc_logger_init( argv ) )
+    {
+        QApplication a( argc, (char **)argv );
         MainWindow w;
         w.show();
-        r=a.exec();
+        r = a.exec();
         jdksavdecc_logger_destroy();
     }
     return r;

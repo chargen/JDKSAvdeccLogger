@@ -37,148 +37,152 @@ extern "C" {
 #endif
 
 us_rawnet_multi_t multi_rawnet;
-bool option_help=false;
-bool option_help_default=false;
-bool option_dump=false;
-bool option_dump_default=false;
+bool option_help = false;
+bool option_help_default = false;
+bool option_dump = false;
+bool option_dump_default = false;
 
-uint64_t option_target_entity_id=0xffffffffffffffffULL;
+uint64_t option_target_entity_id = 0xffffffffffffffffULL;
 struct jdksavdecc_eui64 option_target_entity_eui64;
-uint64_t option_target_entity_id_default=0xffffffffffffffffULL;
+uint64_t option_target_entity_id_default = 0xffffffffffffffffULL;
 
-uint64_t option_controller_entity_id=0xffffffffffffffffULL;
+uint64_t option_controller_entity_id = 0xffffffffffffffffULL;
 struct jdksavdecc_eui64 option_controller_entity_eui64;
-uint64_t option_controller_entity_id_default=0xffffffffffffffffULL;
+uint64_t option_controller_entity_id_default = 0xffffffffffffffffULL;
 
 us_malloc_allocator_t jdksavdecc_logger_allocator;
 us_getopt_t options;
-us_getopt_option_t option[] = {
-    {"dump","Dump settings to stdout", US_GETOPT_FLAG, &option_dump_default, &option_dump },
-    {"help","Show help", US_GETOPT_FLAG, &option_help_default, &option_help },
-    {"entity","Limit to only receive messages involving this entity", US_GETOPT_HEX64, &option_target_entity_id_default, &option_target_entity_id },
-    {0,0,US_GETOPT_NONE,0,0}
-};
+us_getopt_option_t option[]
+    = {{"dump", "Dump settings to stdout", US_GETOPT_FLAG, &option_dump_default, &option_dump},
+       {"help", "Show help", US_GETOPT_FLAG, &option_help_default, &option_help},
+       {"entity",                         "Limit to only receive messages involving this entity", US_GETOPT_HEX64,
+        &option_target_entity_id_default, &option_target_entity_id},
+       {0, 0, US_GETOPT_NONE, 0, 0}};
 
-bool jdksavdecc_logger_init(const char **argv) {
+bool jdksavdecc_logger_init( const char **argv )
+{
     us_platform_init_sockets();
-    us_malloc_allocator_init(&jdksavdecc_sender_allocator);
-    us_getopt_init(&options, &jdksavdecc_sender_allocator.m_base);
-    us_getopt_add_list(&options, option, 0, "JDKSAvdeccSender options");
-    us_getopt_fill_defaults(&options);
-    us_getopt_parse_args(&options,argv+1);
-    jdksavdecc_eui64_init_from_uint64(&option_target_entity_eui64, option_target_entity_id);
+    us_malloc_allocator_init( &jdksavdecc_sender_allocator );
+    us_getopt_init( &options, &jdksavdecc_sender_allocator.m_base );
+    us_getopt_add_list( &options, option, 0, "JDKSAvdeccSender options" );
+    us_getopt_fill_defaults( &options );
+    us_getopt_parse_args( &options, argv + 1 );
+    jdksavdecc_eui64_init_from_uint64( &option_target_entity_eui64, option_target_entity_id );
 
-    if( option_dump ) {
+    if ( option_dump )
+    {
         us_print_file_t p;
-        us_print_file_init(&p, stdout);
-        us_getopt_dump(&options, &p.m_base, "dump" );
+        us_print_file_init( &p, stdout );
+        us_getopt_dump( &options, &p.m_base, "dump" );
         return false;
     }
 
-    if( option_help ) {
+    if ( option_help )
+    {
         us_print_file_t p;
-        us_print_file_init(&p, stdout);
-        us_getopt_dump(&options, &p.m_base, 0 );
+        us_print_file_init( &p, stdout );
+        us_getopt_dump( &options, &p.m_base, 0 );
         return false;
     }
 
-    us_logger_stdio_start(stdout, stderr);
-    us_log_set_level(US_LOG_LEVEL_WARN);
+    us_logger_stdio_start( stdout, stderr );
+    us_log_set_level( US_LOG_LEVEL_WARN );
 
-    return us_rawnet_multi_open(
-        &multi_rawnet,
-        JDKSAVDECC_AVTP_ETHERTYPE,
-        jdksavdecc_multicast_adp_acmp.value,
-        jdksavdecc_jdks_multicast_log.value)>0;
+    return us_rawnet_multi_open( &multi_rawnet,
+                                 JDKSAVDECC_AVTP_ETHERTYPE,
+                                 jdksavdecc_multicast_adp_acmp.value,
+                                 jdksavdecc_jdks_multicast_log.value ) > 0;
 }
 
-void jdksavdecc_sender_destroy(void) {
-    us_rawnet_multi_close(&multi_rawnet);
+void jdksavdecc_sender_destroy( void )
+{
+    us_rawnet_multi_close( &multi_rawnet );
 }
-
 
 bool jdksavdecc_sender_received_aecp_frame(
-        uint16_t expected_sequence_id,
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+    uint16_t expected_sequence_id, struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len )
+{
     (void)tv;
-    if( buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_AECP ) {
+    if ( buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_AECP )
+    {
         struct jdksavdecc_aecpdu_common aecpdu;
-        if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
+        if ( jdksavdecc_aecpdu_common_read( &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            bool allow = true;
 
-            allow=false;
-            if( (aecpdu.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE) &&
-                (jdksavdecc_eui64_compare(
-                    &aecpdu.controller_entity_id, &option_controller_entity_eui64 )==0) &&
-                (jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_target_entity_eui64)==0)
-            ) {
-                if( aecpdu.sequence_id == expected_sequence_id ) {
-                    allow=true;
+            allow = false;
+            if ( ( aecpdu.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE )
+                 && ( jdksavdecc_eui64_compare( &aecpdu.controller_entity_id, &option_controller_entity_eui64 ) == 0 )
+                 && ( jdksavdecc_eui64_compare( &aecpdu.header.target_entity_id, &option_target_entity_eui64 ) == 0 ) )
+            {
+                if ( aecpdu.sequence_id == expected_sequence_id )
+                {
+                    allow = true;
                 }
             }
 
-            if( allow ) {
-                jdksavdecc_printer_print(print,"AECP:");
-                jdksavdecc_printer_print_eol(print);
-                jdksavdecc_aecp_print(print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
+            if ( allow )
+            {
+                jdksavdecc_printer_print( print, "AECP:" );
+                jdksavdecc_printer_print_eol( print );
+                jdksavdecc_aecp_print( print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
             }
         }
     }
 }
-
 
 bool jdksavdecc_sender_received_acmp_frame(
-        uint16_t expected_sequence_id,
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+    uint16_t expected_sequence_id, struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len )
+{
     (void)tv;
-    if( buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==0x80+JDKSAVDECC_SUBTYPE_ACMP ) {
+    if ( buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_ACMP )
+    {
         struct jdksavdecc_acmpdu acmp;
-        if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=false;
+        if ( jdksavdecc_acmpdu_read( &acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            bool allow = false;
 
-            if( (jdksavdecc_eui64_compare(
-                    &acmp.controller_entity_id,
-                    &option_controller_entity_eui64 )==0) && acmp.sequence_id == expected_sequence_id ) {
-                if( (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_CONNECT_RX_RESPONSE) ||
-                    (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_DISCONNECT_RX_RESPONSE) ||
-                    (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_RX_STATE_RESPONSE) )
+            if ( ( jdksavdecc_eui64_compare( &acmp.controller_entity_id, &option_controller_entity_eui64 ) == 0 )
+                 && acmp.sequence_id == expected_sequence_id )
+            {
+                if ( ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_CONNECT_RX_RESPONSE )
+                     || ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_DISCONNECT_RX_RESPONSE )
+                     || ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_RX_STATE_RESPONSE ) )
                 {
-                    if( jdksavdecc_eui64_compare( &acmp.listener_entity_id, &option_target_listener_entity_eui64 )==0 ) {
-                        if( acmp.talker_unique_id == option_listener_unique_id ) {
-                            allow=true;
+                    if ( jdksavdecc_eui64_compare( &acmp.listener_entity_id, &option_target_listener_entity_eui64 ) == 0 )
+                    {
+                        if ( acmp.talker_unique_id == option_listener_unique_id )
+                        {
+                            allow = true;
                         }
                     }
-                } else if( (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_CONNECT_TX_RESPONSE) ||
-                    (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_DISCONNECT_TX_RESPONSE) ||
-                    (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_TX_CONNECTION_RESPONSE) ||
-                    (acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_TX_STATE_RESPONSE) )
+                }
+                else if ( ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_CONNECT_TX_RESPONSE )
+                          || ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_DISCONNECT_TX_RESPONSE )
+                          || ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_TX_CONNECTION_RESPONSE )
+                          || ( acmp.header.message_type == JDKSAVDECC_ACMP_MESSAGE_TYPE_GET_TX_STATE_RESPONSE ) )
                 {
-                    if( jdksavdecc_eui64_compare( &acmp.talker_entity_id, &option_target_talker_entity_eui64 )==0 ) {
-                        if( acmp.talker_unique_id == option_talker_unique_id ) {
-                            allow=true;
+                    if ( jdksavdecc_eui64_compare( &acmp.talker_entity_id, &option_target_talker_entity_eui64 ) == 0 )
+                    {
+                        if ( acmp.talker_unique_id == option_talker_unique_id )
+                        {
+                            allow = true;
                         }
                     }
                 }
             }
 
-            if( allow ) {
-                jdksavdecc_printer_print(print,"ACMP:");
-                jdksavdecc_printer_print_eol(print);
-                jdksavdecc_acmpdu_print(print, &acmp);
-                jdksavdecc_printer_print_eol(print);
+            if ( allow )
+            {
+                jdksavdecc_printer_print( print, "ACMP:" );
+                jdksavdecc_printer_print_eol( print );
+                jdksavdecc_acmpdu_print( print, &acmp );
+                jdksavdecc_printer_print_eol( print );
             }
         }
     }
 }
-
 
 #ifdef __cplusplus
 }
 #endif
-

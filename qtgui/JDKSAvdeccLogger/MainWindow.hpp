@@ -24,7 +24,8 @@
 #include <QMainWindow>
 #include <QBasicTimer>
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -32,29 +33,22 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
+  public:
+    explicit MainWindow( QWidget *parent = 0 );
     ~MainWindow();
 
-public slots:
+  public
+slots:
     void settingsChanged();
 
-protected:
-    void timerEvent(QTimerEvent *event);
+  protected:
+    void timerEvent( QTimerEvent *event );
 
-    virtual void incomingAvdeccPacket(
-            us_rawnet_multi_t *self,
-            int ethernet_port,
-            uint8_t *buf,
-            uint16_t len );
+    virtual void incomingAvdeccPacket( us_rawnet_multi_t *self, int ethernet_port, uint8_t *buf, uint16_t len );
 
-private:
-    static void incomingAvdeccPacketCallback(
-            us_rawnet_multi_t *self,
-            int ethernet_port,
-            void *context,
-            uint8_t *buf,
-            uint16_t len );
+  private:
+    static void
+        incomingAvdeccPacketCallback( us_rawnet_multi_t *self, int ethernet_port, void *context, uint8_t *buf, uint16_t len );
 
     bool initializing;
     bool global_enable;
