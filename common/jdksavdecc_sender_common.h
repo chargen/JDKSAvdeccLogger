@@ -72,25 +72,15 @@ extern char aem_command_payload[1024];
 extern us_getopt_t options;
 extern us_getopt_option_t option[];
 
-bool jdksavdecc_sender_init(const char **argv);
-void jdksavdecc_sender_destroy(void);
+bool jdksavdecc_sender_init( const char **argv );
+void jdksavdecc_sender_destroy( void );
 
 bool jdksavdecc_sender_received_aecp_frame(
-        uint16_t expected_sequence_id,
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
+    uint16_t expected_sequence_id, struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len );
 
 bool jdksavdecc_sender_received_acmp_frame(
-        uint16_t expected_sequence_id,
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
-
+    uint16_t expected_sequence_id, struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len );
 
 #ifdef __cplusplus
 }
 #endif
-

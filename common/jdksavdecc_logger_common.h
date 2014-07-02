@@ -58,34 +58,27 @@ extern struct jdksavdecc_eui64 option_entity_eui64;
 extern us_getopt_t options;
 extern us_getopt_option_t option[];
 
-bool jdksavdecc_logger_init(const char **argv);
-void jdksavdecc_logger_destroy(void);
+bool jdksavdecc_logger_init( const char **argv );
+void jdksavdecc_logger_destroy( void );
 
-void jdksavdecc_logger_print_aecp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
+void jdksavdecc_logger_print_aecp_frame( struct jdksavdecc_printer *print,
+                                         struct timeval *tv,
+                                         uint8_t const *buf,
+                                         uint16_t len );
 
-void jdksavdecc_logger_print_adp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
+void
+    jdksavdecc_logger_print_adp_frame( struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len );
 
-void jdksavdecc_logger_print_acmp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
+void jdksavdecc_logger_print_acmp_frame( struct jdksavdecc_printer *print,
+                                         struct timeval *tv,
+                                         uint8_t const *buf,
+                                         uint16_t len );
 
-void jdksavdecc_logger_print_jdkslog_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len );
+void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
+                                            struct timeval *tv,
+                                            uint8_t const *buf,
+                                            uint16_t len );
 
 #ifdef __cplusplus
 }
 #endif
-

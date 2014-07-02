@@ -37,199 +37,225 @@ extern "C" {
 #endif
 
 us_rawnet_multi_t multi_rawnet;
-bool option_help=false;
-bool option_help_default=false;
-bool option_dump=false;
-bool option_dump_default=false;
-int16_t option_adp=true;
-int16_t option_adp_default=true;
-int16_t option_acmp=true;
-int16_t option_acmp_default=true;
-int16_t option_aecp=true;
-int16_t option_aecp_default=true;
-int16_t option_jdkslog=true;
-int16_t option_jdkslog_default=true;
-uint64_t option_entity=0xffffffffffffffffULL;
+bool option_help = false;
+bool option_help_default = false;
+bool option_dump = false;
+bool option_dump_default = false;
+int16_t option_adp = true;
+int16_t option_adp_default = true;
+int16_t option_acmp = true;
+int16_t option_acmp_default = true;
+int16_t option_aecp = true;
+int16_t option_aecp_default = true;
+int16_t option_jdkslog = true;
+int16_t option_jdkslog_default = true;
+uint64_t option_entity = 0xffffffffffffffffULL;
 struct jdksavdecc_eui64 option_entity_eui64;
-uint64_t option_entity_default=0xffffffffffffffffULL;
+uint64_t option_entity_default = 0xffffffffffffffffULL;
 
 us_malloc_allocator_t jdksavdecc_logger_allocator;
 us_getopt_t options;
 us_getopt_option_t option[] = {
-    {"dump","Dump settings to stdout", US_GETOPT_FLAG, &option_dump_default, &option_dump },
-    {"help","Show help", US_GETOPT_FLAG, &option_help_default, &option_help },
-    {"adp","Enable logging ADP", US_GETOPT_INT16, &option_adp_default, &option_adp },
-    {"acmp","Enable logging ACMP", US_GETOPT_INT16, &option_acmp_default, &option_acmp },
-    {"aecp","Enable logging AECP", US_GETOPT_INT16, &option_aecp_default, &option_aecp },
-    {"jdkslog","Enable logging of JDKS Logging messages", US_GETOPT_INT16, &option_jdkslog_default, &option_jdkslog },
-    {"entity","Limit to only receive messages involving this entity", US_GETOPT_HEX64, &option_entity_default, &option_entity },
-    {0,0,US_GETOPT_NONE,0,0}
-};
+    {"dump", "Dump settings to stdout", US_GETOPT_FLAG, &option_dump_default, &option_dump},
+    {"help", "Show help", US_GETOPT_FLAG, &option_help_default, &option_help},
+    {"adp", "Enable logging ADP", US_GETOPT_INT16, &option_adp_default, &option_adp},
+    {"acmp", "Enable logging ACMP", US_GETOPT_INT16, &option_acmp_default, &option_acmp},
+    {"aecp", "Enable logging AECP", US_GETOPT_INT16, &option_aecp_default, &option_aecp},
+    {"jdkslog", "Enable logging of JDKS Logging messages", US_GETOPT_INT16, &option_jdkslog_default, &option_jdkslog},
+    {"entity", "Limit to only receive messages involving this entity", US_GETOPT_HEX64, &option_entity_default, &option_entity},
+    {0, 0, US_GETOPT_NONE, 0, 0}};
 
-bool jdksavdecc_logger_init(const char **argv) {
+bool jdksavdecc_logger_init( const char **argv )
+{
     us_platform_init_sockets();
-    us_malloc_allocator_init(&jdksavdecc_logger_allocator);
-    us_getopt_init(&options, &jdksavdecc_logger_allocator.m_base);
-    us_getopt_add_list(&options, option, 0, "JDKSAvdeccLogger options");
-    us_getopt_fill_defaults(&options);
-    us_getopt_parse_args(&options,argv+1);
-    jdksavdecc_eui64_init_from_uint64(&option_entity_eui64, option_entity);
+    us_malloc_allocator_init( &jdksavdecc_logger_allocator );
+    us_getopt_init( &options, &jdksavdecc_logger_allocator.m_base );
+    us_getopt_add_list( &options, option, 0, "JDKSAvdeccLogger options" );
+    us_getopt_fill_defaults( &options );
+    us_getopt_parse_args( &options, argv + 1 );
+    jdksavdecc_eui64_init_from_uint64( &option_entity_eui64, option_entity );
 
-    if( option_dump ) {
+    if ( option_dump )
+    {
         us_print_file_t p;
-        us_print_file_init(&p, stdout);
-        us_getopt_dump(&options, &p.m_base, "dump" );
+        us_print_file_init( &p, stdout );
+        us_getopt_dump( &options, &p.m_base, "dump" );
         return false;
     }
 
-    if( option_help ) {
+    if ( option_help )
+    {
         us_print_file_t p;
-        us_print_file_init(&p, stdout);
-        us_getopt_dump(&options, &p.m_base, 0 );
+        us_print_file_init( &p, stdout );
+        us_getopt_dump( &options, &p.m_base, 0 );
         return false;
     }
 
-    us_logger_stdio_start(stdout, stderr);
-    us_log_set_level(US_LOG_LEVEL_WARN);
+    us_logger_stdio_start( stdout, stderr );
+    us_log_set_level( US_LOG_LEVEL_WARN );
 
-    return us_rawnet_multi_open(
-        &multi_rawnet,
-        JDKSAVDECC_AVTP_ETHERTYPE,
-        jdksavdecc_multicast_adp_acmp.value,
-        jdksavdecc_jdks_multicast_log.value)>0;
+    return us_rawnet_multi_open( &multi_rawnet,
+                                 JDKSAVDECC_AVTP_ETHERTYPE,
+                                 jdksavdecc_multicast_adp_acmp.value,
+                                 jdksavdecc_jdks_multicast_log.value ) > 0;
 }
 
-void jdksavdecc_logger_destroy(void) {
-    us_rawnet_multi_close(&multi_rawnet);
+void jdksavdecc_logger_destroy( void )
+{
+    us_rawnet_multi_close( &multi_rawnet );
 }
 
-
-
-void jdksavdecc_logger_print_aecp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+void
+    jdksavdecc_logger_print_aecp_frame( struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len )
+{
     (void)tv;
-    if( option_aecp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_AECP ) {
+    if ( option_aecp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == JDKSAVDECC_1722A_SUBTYPE_AECP )
+    {
         struct jdksavdecc_aecpdu_common aecpdu;
-        if( jdksavdecc_aecpdu_common_read(&aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
+        if ( jdksavdecc_aecpdu_common_read( &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            bool allow = true;
 
             // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&aecpdu.controller_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&aecpdu.header.target_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
+            if ( jdksavdecc_eui64_is_set( option_entity_eui64 ) )
+            {
+                allow = false;
+                if ( jdksavdecc_eui64_compare( &aecpdu.controller_entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
+                }
+                else if ( jdksavdecc_eui64_compare( &aecpdu.header.target_entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
                 }
             }
-            if( allow ) {
-                jdksavdecc_printer_print(print,"AECP:");
-                jdksavdecc_printer_print_eol(print);
-                jdksavdecc_aecp_print(print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
+            if ( allow )
+            {
+                jdksavdecc_printer_print( print, "AECP:" );
+                jdksavdecc_printer_print_eol( print );
+                jdksavdecc_aecp_print( print, &aecpdu, buf, JDKSAVDECC_FRAME_HEADER_LEN, len );
             }
         }
     }
 }
 
-void jdksavdecc_logger_print_adp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+void jdksavdecc_logger_print_adp_frame( struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len )
+{
     (void)tv;
-    if( option_adp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_ADP ) {
+    if ( option_adp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == JDKSAVDECC_1722A_SUBTYPE_ADP )
+    {
         struct jdksavdecc_adpdu adp;
-        if( jdksavdecc_adpdu_read(&adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
+        if ( jdksavdecc_adpdu_read( &adp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            bool allow = true;
             // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&adp.header.entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
+            if ( jdksavdecc_eui64_is_set( option_entity_eui64 ) )
+            {
+                allow = false;
+                if ( jdksavdecc_eui64_compare( &adp.header.entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
                 }
             }
-            if( allow ) {
-                jdksavdecc_printer_print(print,"ADP:");
-                jdksavdecc_printer_print_eol(print);
-                jdksavdecc_adpdu_print(print, &adp);
-                jdksavdecc_printer_print_eol(print);
+            if ( allow )
+            {
+                jdksavdecc_printer_print( print, "ADP:" );
+                jdksavdecc_printer_print_eol( print );
+                jdksavdecc_adpdu_print( print, &adp );
+                jdksavdecc_printer_print_eol( print );
             }
         }
     }
 }
 
-void jdksavdecc_logger_print_acmp_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+void
+    jdksavdecc_logger_print_acmp_frame( struct jdksavdecc_printer *print, struct timeval *tv, uint8_t const *buf, uint16_t len )
+{
     (void)tv;
-    if( option_acmp==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_ACMP ) {
+    if ( option_acmp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == JDKSAVDECC_1722A_SUBTYPE_ACMP )
+    {
         struct jdksavdecc_acmpdu acmp;
-        if( jdksavdecc_acmpdu_read(&acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            bool allow=true;
+        if ( jdksavdecc_acmpdu_read( &acmp, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            bool allow = true;
             // filter out non-interesting entity id's if we are asked to
-            if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                allow=false;
-                if( jdksavdecc_eui64_compare(&acmp.controller_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.talker_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
-                } else if( jdksavdecc_eui64_compare(&acmp.listener_entity_id, &option_entity_eui64 )==0) {
-                    allow=true;
+            if ( jdksavdecc_eui64_is_set( option_entity_eui64 ) )
+            {
+                allow = false;
+                if ( jdksavdecc_eui64_compare( &acmp.controller_entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
+                }
+                else if ( jdksavdecc_eui64_compare( &acmp.talker_entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
+                }
+                else if ( jdksavdecc_eui64_compare( &acmp.listener_entity_id, &option_entity_eui64 ) == 0 )
+                {
+                    allow = true;
                 }
             }
 
-            if( allow ) {
-                jdksavdecc_printer_print(print,"ACMP:");
-                jdksavdecc_printer_print_eol(print);
-                jdksavdecc_acmpdu_print(print, &acmp);
-                jdksavdecc_printer_print_eol(print);
+            if ( allow )
+            {
+                jdksavdecc_printer_print( print, "ACMP:" );
+                jdksavdecc_printer_print_eol( print );
+                jdksavdecc_acmpdu_print( print, &acmp );
+                jdksavdecc_printer_print_eol( print );
             }
         }
     }
 }
 
-void jdksavdecc_logger_print_jdkslog_frame(
-        struct jdksavdecc_printer *print,
-        struct timeval *tv,
-        uint8_t const *buf,
-        uint16_t len ) {
+void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
+                                            struct timeval *tv,
+                                            uint8_t const *buf,
+                                            uint16_t len )
+{
     (void)tv;
-    if( option_jdkslog==1 && buf[JDKSAVDECC_FRAME_HEADER_LEN+0]==JDKSAVDECC_1722A_SUBTYPE_AECP ) {
+    if ( option_jdkslog == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == JDKSAVDECC_1722A_SUBTYPE_AECP )
+    {
         struct jdksavdecc_aecpdu_aem aem;
-        if( jdksavdecc_aecpdu_aem_read(&aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len )>0 ) {
-            if( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
-                    && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL ) {
-                bool allow=true;
+        if ( jdksavdecc_aecpdu_aem_read( &aem, buf, JDKSAVDECC_FRAME_HEADER_LEN, len ) > 0 )
+        {
+            if ( aem.aecpdu_header.header.message_type == JDKSAVDECC_AECP_MESSAGE_TYPE_AEM_RESPONSE
+                 && aem.command_type == 0x8000 + JDKSAVDECC_AEM_COMMAND_SET_CONTROL )
+            {
+                bool allow = true;
 
                 // filter out non-interesting entity id's if we are asked to
-                if( jdksavdecc_eui64_is_set(option_entity_eui64) ) {
-                    allow=false;
-                    if( jdksavdecc_eui64_compare(&aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 )==0) {
-                        allow=true;
+                if ( jdksavdecc_eui64_is_set( option_entity_eui64 ) )
+                {
+                    allow = false;
+                    if ( jdksavdecc_eui64_compare( &aem.aecpdu_header.header.target_entity_id, &option_entity_eui64 ) == 0 )
+                    {
+                        allow = true;
                     }
                 }
-                if( jdksavdecc_eui64_compare(&aem.aecpdu_header.controller_entity_id, &jdksavdecc_jdks_notifications_controller_entity_id )==0) {
-                    allow&=true;
+                if ( jdksavdecc_eui64_compare( &aem.aecpdu_header.controller_entity_id,
+                                               &jdksavdecc_jdks_notifications_controller_entity_id ) == 0 )
+                {
+                    allow &= true;
                 }
-                else {
-                    allow=false;
+                else
+                {
+                    allow = false;
                 }
-                if( allow ) {
-                    struct jdksavdecc_jdks_log_control log_msg;                                       
+                if ( allow )
+                {
+                    struct jdksavdecc_jdks_log_control log_msg;
                     ssize_t text_len;
-                    memset(&log_msg,0,sizeof(log_msg) );
-                    text_len = jdksavdecc_jdks_log_control_read(&log_msg,buf,len);
-                    if( text_len<0 ) {
-                        jdksavdecc_printer_print(print,"JDKSLOG-ERROR");
+                    memset( &log_msg, 0, sizeof( log_msg ) );
+                    text_len = jdksavdecc_jdks_log_control_read( &log_msg, buf, len );
+                    if ( text_len < 0 )
+                    {
+                        jdksavdecc_printer_print( print, "JDKSLOG-ERROR" );
                     }
-                    if( text_len>=0) {
+                    if ( text_len >= 0 )
+                    {
                         const char *level;
-                        switch (log_msg.log_detail) {
+                        switch ( log_msg.log_detail )
+                        {
                         case JDKSAVDECC_JDKS_LOG_ERROR:
                             level = "ERROR";
                             break;
@@ -255,27 +281,28 @@ void jdksavdecc_logger_print_jdkslog_frame(
                             level = "unknown";
                             break;
                         }
-                        jdksavdecc_printer_print(print,"JDKSLOG");
-                        jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_print(print,level);
-                        jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_printc(print,'[');
-                        jdksavdecc_printer_print_eui64(print,log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id);
-                        jdksavdecc_printer_printc(print,']');
-                        jdksavdecc_printer_printc(print,':');
-                        jdksavdecc_printer_print_uint16(print,log_msg.cmd.descriptor_index);
-                        jdksavdecc_printer_printc(print,':');
-                        
+                        jdksavdecc_printer_print( print, "JDKSLOG" );
+                        jdksavdecc_printer_printc( print, ':' );
+                        jdksavdecc_printer_print( print, level );
+                        jdksavdecc_printer_printc( print, ':' );
+                        jdksavdecc_printer_printc( print, '[' );
+                        jdksavdecc_printer_print_eui64( print, log_msg.cmd.aem_header.aecpdu_header.header.target_entity_id );
+                        jdksavdecc_printer_printc( print, ']' );
+                        jdksavdecc_printer_printc( print, ':' );
+                        jdksavdecc_printer_print_uint16( print, log_msg.cmd.descriptor_index );
+                        jdksavdecc_printer_printc( print, ':' );
+
                         {
                             uint16_t i;
-                            for( i=0; i<text_len; ++i ) {
-                                char c=(char)log_msg.text[i];
-                                if( isprint(c) ) {
-                                    jdksavdecc_printer_printc(print,c);
+                            for ( i = 0; i < text_len; ++i )
+                            {
+                                char c = (char)log_msg.text[i];
+                                if ( isprint( c ) )
+                                {
+                                    jdksavdecc_printer_printc( print, c );
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -283,8 +310,6 @@ void jdksavdecc_logger_print_jdkslog_frame(
     }
 }
 
-
 #ifdef __cplusplus
 }
 #endif
-
