@@ -207,11 +207,12 @@ void
     }
 }
 
-void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
+bool jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
                                             struct timeval *tv,
                                             uint8_t const *buf,
                                             uint16_t len )
 {
+    bool was_log=false;
     (void)tv;
     if ( option_jdkslog == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == JDKSAVDECC_1722A_SUBTYPE_AECP )
     {
@@ -281,6 +282,7 @@ void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
                             level = "unknown";
                             break;
                         }
+                        was_log=true;
                         jdksavdecc_printer_print( print, "JDKSLOG" );
                         jdksavdecc_printer_printc( print, ':' );
                         jdksavdecc_printer_print( print, level );
@@ -308,6 +310,7 @@ void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
             }
         }
     }
+    return was_log;
 }
 
 #ifdef __cplusplus

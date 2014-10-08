@@ -74,7 +74,7 @@ void jdksavdecc_logger_print_acmp_frame( struct jdksavdecc_printer *print,
                                          uint8_t const *buf,
                                          uint16_t len );
 
-void jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
+bool jdksavdecc_logger_print_jdkslog_frame( struct jdksavdecc_printer *print,
                                             struct timeval *tv,
                                             uint8_t const *buf,
                                             uint16_t len );

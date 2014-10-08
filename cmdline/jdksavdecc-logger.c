@@ -28,17 +28,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *context, uint8_t *buf, uint16_t len )
 {
-    (void)ethernet_port;
-    (void)context;
+    bool was_log=false;
     char text[4096] = "";
     struct timeval tv;
     us_gettimeofday( &tv );
     struct jdksavdecc_printer print;
+
+    (void)ethernet_port;
+    (void)context;
     jdksavdecc_printer_init( &print, text, sizeof( text ) );
 
     if ( option_jdkslog == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_AECP )
     {
-        jdksavdecc_logger_print_jdkslog_frame( &print, &tv, buf, len );
+        was_log = jdksavdecc_logger_print_jdkslog_frame( &print, &tv, buf, len );
     }
     else if ( option_acmp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_ACMP )
     {
@@ -48,13 +50,13 @@ void incoming_packet_handler( us_rawnet_multi_t *self, int ethernet_port, void *
     {
         jdksavdecc_logger_print_adp_frame( &print, &tv, buf, len );
     }
-    else if ( option_aecp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_AECP )
+    if ( !was_log && option_aecp == 1 && buf[JDKSAVDECC_FRAME_HEADER_LEN + 0] == 0x80 + JDKSAVDECC_SUBTYPE_AECP )
     {
         jdksavdecc_logger_print_aecp_frame( &print, &tv, buf, len );
     }
     if ( *text != 0 )
     {
-        fprintf( stdout, "%d.%d:%s\n", (int)tv.tv_sec, (int)tv.tv_usec, text );
+        fprintf( stdout, "%d.%06d:%s\n", (int)tv.tv_sec, (int)tv.tv_usec, text );
     }
 }
 
